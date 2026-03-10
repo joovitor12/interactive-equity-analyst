@@ -6,13 +6,5 @@ research_agent = Agent(
     name="Research Agent",
     model=OpenAIChat(id="gpt-4o"),
     tools=[DuckDuckGoTools(...)],
-     instructions=[
-      "You are a financial research analyst.",
-      "Search for the latest news, market sentiment, and analyst opinions.",
-      "Summarize findings concisely with source context.",
-      "Focus on material information that could impact investment decisions.",
-    ],
+    role="Searches the web for news and market sentiment"
 )
-
-def get_research_agent() -> Agent:
-    return research_agent

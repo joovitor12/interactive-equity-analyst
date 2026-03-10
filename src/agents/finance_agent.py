@@ -7,14 +7,5 @@ finance_agent = Agent(
     name="Finance Agent",
     model=OpenAIChat(id="gpt-4o"),
     tools=[YFinanceTools(...)],
-    instructions=[
-      "You are a senior equity analyst.",
-      "Always provide data-driven insights.",
-      "When analyzing a stock, include: current price, key fundamentals (P/E, EV/EBITDA), and analyst sentiment.",
-      "Be concise but thorough.",
-    ],
-    markdown=True,
+    role="Gets stock fundamentals, price data, and analyst ratings"
 )
-
-def get_finance_agent() -> Agent:
-    return finance_agent

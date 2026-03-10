@@ -13,4 +13,5 @@ dependencies = [
       "alembic",
       "psycopg2-binary",
       "ddgs>=9.11.2",
+      "psycopg>=3.3.3",
 ]
