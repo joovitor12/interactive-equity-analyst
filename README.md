@@ -1,36 +1,166 @@
-Project Brief: Interactive Equity Analyst Agent (Agno Framework)
-Core Concept
-An AI-powered financial co-pilot built with the Agno (formerly Phidata) framework. Unlike static dashboards (Investing.com/Webull), this system allows users to interrogate and debate market analyses and earnings reports using Multi-Agent orchestration and RAG.
+# Interactive Equity Analyst Agent
 
-Key Features
-The "Analyst Critique" (Differentiator): Scrapes or ingests market opinions (e.g., Investing.com) and allows the user to ask follow-up questions to challenge the consensus.
+An AI-powered financial co-pilot built with the [Agno](https://github.com/agno-agi/agno) framework. Unlike static dashboards (Investing.com/Webull), this system allows users to interrogate and debate market analyses and earnings reports using Multi-Agent orchestration and RAG.
 
-Multi-Agent Workflow:
+## Key Features
 
-Research Agent: Uses DuckDuckGo or Firecrawl to fetch the latest market sentiment and news.
+### Analyst Critique (Differentiator)
+Challenge Wall Street consensus with your own investment thesis. The system fetches real analyst ratings (55+ analysts for major stocks) and compares them to your views.
 
-Finance Agent: Uses YFinanceTools to pull real-time fundamental data (P/E, EV/EBITDA, Analyst Ratings).
+### Multi-Agent Workflow
+- **Finance Agent**: Real-time stock data, fundamentals, and analyst recommendations via YFinance
+- **Research Agent**: Latest news and market sentiment via DuckDuckGo
+- **RAG Agent**: Query earnings call transcripts stored in vector database
 
-RAG Agent: Processes uploaded PDFs (Quarterly Earnings Calls) to extract qualitative insights (management "tone" vs. hard numbers).
+### Persistent Memory
+PostgreSQL (Supabase) stores your investment theses, allowing the agent to remind you of your original logic months later.
 
-Persistent Memory: Uses PostgreSQL to store investment theses, allowing the agent to remind the user of their original logic months later.
+## Tech Stack
 
-Tech Stack
-Orchestration: Agno Framework
+- **Orchestration**: Agno Framework
+- **LLM**: GPT-4o (via Agno OpenAIChat)
+- **Database**: Supabase PostgreSQL (sessions + pgvector for RAG)
+- **Tools**: YFinance, DuckDuckGo, Crawl4AI
 
-LLM: GPT-4o or Claude 3.5 Sonnet (via Agno OpenAIChat or Anthropic)
+## Setup
 
-Database/Memory: PostgreSQL (for session storage and vector search via pgvector)
+### 1. Clone and Install Dependencies
 
-Tools: YFinanceTools, DuckDuckGo, FileTools (for PDF processing)
+```bash
+git clone <repo-url>
+cd interactive-equity-analyst
+uv sync
+```
 
-UI (Optional): Streamlit or FastHTML
+### 2. Install Playwright (for web scraping)
 
-Instructions for Cursor Agent
-Initialize an Agno project structure with a dedicated agent.py.
+```bash
+playwright install
+```
 
-Implement a Multi-Agent system where a MarketAnalyst agent hands off data to a ResearchAgent.
+### 3. Configure Environment Variables
 
-Setup a RAG pipeline using LanceDB or PostgreSQL to store Earnings Call transcripts.
+Create a `.env` file:
 
-Create a function-calling tool that specifically pulls Valuation Multiples to compare them with sector averages.
+```env
+OPENAI_API_KEY=your_openai_key
+DATABASE_URL=postgresql+psycopg://postgres.xxx:password@aws-0-region.pooler.supabase.com:6543/postgres
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SERVICE_KEY=your_service_key
+```
+
+### 4. Run Database Migrations
+
+```bash
+uv run alembic upgrade head
+```
+
+### 5. Enable pgvector in Supabase
+
+Run in Supabase SQL Editor:
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
+## Usage
+
+```bash
+uv run main.py
+```
+
+## Example Workflows
+
+### 1. Save Your Investment Thesis
+
+```
+I'm bullish on NVDA. AI datacenter demand will triple by 2027, and they have 80% market share in training GPUs. Current price around $185, target $300.
+```
+
+### 2. Get Wall Street Analyst Ratings
+
+```
+Get analyst ratings for NVDA
+```
+
+**Output**: Real data from 55 analysts - Strong Buy consensus, mean target $267, high target $380.
+
+### 3. Compare Your Thesis to Consensus (Analyst Critique)
+
+```
+Compare my NVDA thesis to Wall Street consensus
+```
+
+**Output**: Side-by-side comparison showing your $300 target vs analyst mean of $267.
+
+### 4. Research Latest News
+
+```
+What's the latest news on Tesla?
+```
+
+### 5. Get Stock Fundamentals
+
+```
+Give me a complete analysis of AAPL - fundamentals and recent news
+```
+
+### 6. Search for Earnings Transcripts
+
+```
+Find NVDA earnings transcripts
+```
+
+### 7. Scrape and Save a Transcript
+
+```
+Scrape and save the transcript from https://www.investing.com/news/transcripts/...
+```
+
+### 8. Query the Knowledge Base
+
+```
+What did NVIDIA management say about AI demand in their earnings call?
+```
+
+### 9. Track Your Thesis Over Time
+
+```
+What are my investment theses on NVDA?
+```
+
+```
+Give me current NVDA data and compare it to my original thesis.
+```
+
+## Project Structure
+
+```
+interactive-equity-analyst/
+├── src/
+│   ├── agents/
+│   │   ├── finance_agent.py    # YFinance tools
+│   │   ├── research_agent.py   # DuckDuckGo search
+│   │   ├── rag_agent.py        # Knowledge base queries
+│   │   └── team.py             # Multi-agent orchestration
+│   ├── tools/
+│   │   ├── thesis_tools.py     # Save/retrieve investment theses
+│   │   ├── transcript_tools.py # Scrape earnings transcripts
+│   │   └── analyst_tools.py    # Fetch Wall Street ratings
+│   └── knowledge/
+│       └── earnings.py         # Vector DB configuration
+├── alembic/                    # Database migrations
+├── main.py                     # Entry point
+├── pyproject.toml
+└── .env
+```
+
+## Database Tables
+
+- `investment_theses`: Your bull/bear cases with price targets
+- `analyst_opinions`: Wall Street ratings and price targets
+- `ai.earnings_documents`: Vectorized earnings transcripts (pgvector)
+- `ai.agno_sessions`: Conversation history
+
+## License
+
+MIT
